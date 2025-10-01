@@ -36,7 +36,7 @@ public class ResidentialPropertyDetailsController {
 
     @PutMapping(value="/update/{agentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> updateProperty(
-            @RequestPart("property") ResidentialPropertyRequest property, @RequestPart("files") List<MultipartFile> files, @PathVariable Integer agentId) throws IOException {
+            @RequestPart("property") ResidentialPropertyRequest property, @RequestPart(value="files", required = false) List<MultipartFile> files, @PathVariable Integer agentId) throws IOException {
         System.out.println("Received DTO: " + property);
         return ResponseEntity.ok(service.updateProperty(property,files,agentId));
     }
@@ -47,7 +47,7 @@ public class ResidentialPropertyDetailsController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("deleteProperty/{listingId}/{agentId}")
+    @DeleteMapping("/deleteProperty/{listingId}/{agentId}")
     public ResponseEntity<Void> deleteProperty(@PathVariable Integer listingId, @PathVariable Integer agentId) {
         service.deleteProperty(listingId,agentId);
         return ResponseEntity.noContent().build();

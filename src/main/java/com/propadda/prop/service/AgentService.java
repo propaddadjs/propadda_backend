@@ -313,5 +313,46 @@ public class AgentService {
             }
             return false;
     }
+
+    @Transactional
+    public Object renewProperty(Integer listingId, String category, Integer agentId) {
+        if(category.equalsIgnoreCase("Commercial")){
+            CommercialPropertyDetails cpd = cRepo.findByListingIdAndCommercialOwner_UserId(listingId, agentId).orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+            cpd.setExpired(false);
+            cpd.setAdminApproved("Pending");
+            cRepo.save(cpd);
+            // NotificationDetails notification = new NotificationDetails();
+            // String message = "Your listing titled- "+cpd.getTitle()+" has been renewed.";
+            // notification.setNotificationType(NotificationType.RenewedListing);
+            // notification.setNotificationMessage(message);
+            // notification.setNotificationReceiverId(cpd.getCommercialOwner().getUserId());
+            // notification.setNotificationReceiverRole(Role.AGENT);
+            // notification.setNotificationSenderId(1);
+            // notification.setNotificationSenderRole(Role.ADMIN);
+            // notificationRepo.save(notification);
+            return cpd;
+        }
+        else
+        if(category.equalsIgnoreCase("Residential")){
+            ResidentialPropertyDetails rpd = rRepo.findByListingIdAndResidentialOwner_UserId(listingId, agentId)
+            .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+            rpd.setExpired(false);
+            rpd.setAdminApproved("Pending");
+            rRepo.save(rpd);
+            // NotificationDetails notification = new NotificationDetails();
+            // String message = "Your listing titled- "+rpd.getTitle()+" has been renewed.";
+            // notification.setNotificationType(NotificationType.RenewedListing);
+            // notification.setNotificationMessage(message);
+            // notification.setNotificationReceiverId(rpd.getResidentialOwner().getUserId());
+            // notification.setNotificationReceiverRole(Role.AGENT);
+            // notification.setNotificationSenderId(1);
+            // notification.setNotificationSenderRole(Role.ADMIN);
+            // notificationRepo.save(notification);
+            return rpd;
+        }
+        else {
+            return null;
+        }
+    }
     
 }

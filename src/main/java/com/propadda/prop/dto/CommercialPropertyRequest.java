@@ -2,6 +2,7 @@ package com.propadda.prop.dto;
 
 public class CommercialPropertyRequest {
 
+    private Integer listingId;
     private String preference;
     private String propertyType;
     private String title;
@@ -289,6 +290,10 @@ public class CommercialPropertyRequest {
 
     public void setReraVerified(Boolean reraVerified) {
         this.reraVerified = reraVerified;
+    }
+
+    public Integer getListingId() {
+        return listingId;
     }
 
 

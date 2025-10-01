@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.propadda.prop.dto.CommercialPropertyRequest;
 import com.propadda.prop.enumerations.Role;
+import com.propadda.prop.mappers.CommercialPropertyMapper;
 import com.propadda.prop.model.CommercialPropertyDetails;
 import com.propadda.prop.model.CommercialPropertyMedia;
 import com.propadda.prop.model.Users;
@@ -149,45 +149,79 @@ public class CommercialPropertyDetailsService {
     // }
 
     @Transactional
-    public void deleteProperty(Integer id, Integer agentId) {
-        Optional<CommercialPropertyDetails> cpd = repository.findById(id);
-        if(cpd.isPresent()){
-            for(CommercialPropertyMedia m : cpd.get().getCommercialPropertyMediaFiles()){
+    public void deleteProperty(Integer listingId, Integer agentId) {
+        CommercialPropertyDetails cpd = repository.findByListingIdAndCommercialOwner_UserId(listingId, agentId).orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+        
+            for(CommercialPropertyMedia m : cpd.getCommercialPropertyMediaFiles()){
                 String url = m.getUrl();
                 gcsService.deleteFile(url);
             }
-            favRepo.deleteByPropertyIdAndPropertyType(id,"Commercial");
-            enqRepo.deleteByPropertyIdAndPropertyType(id, "Commercial");
-            repository.deleteById(id);
+            favRepo.deleteByPropertyIdAndPropertyType(listingId,"Commercial");
+            enqRepo.deleteByPropertyIdAndPropertyType(listingId, "Commercial");
+            repository.deleteById(listingId);
+        
+    }
+
+    @Transactional
+    public Object updateProperty(CommercialPropertyRequest property, List<MultipartFile> files, Integer agentId) throws IOException {
+        CommercialPropertyDetails propModel = repository.findByListingIdAndCommercialOwner_UserId(property.getListingId(), agentId)
+            .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+        
+        CommercialPropertyDetails updated = CommercialPropertyMapper.requestToModel(propModel, property);
+
+        if (files != null && !files.isEmpty()) {
+            Integer order = 1;
+            List<CommercialPropertyMedia> mediaFilesList = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String url = gcsService.uploadFile(file,"commercial");
+            CommercialPropertyMedia media = new CommercialPropertyMedia();
+            media.setUrl(url);
+            media.setFilename(file.getOriginalFilename());
+            media.setSize(file.getSize());
+            media.setUploadedAt(Instant.now());
+            media.setProperty(updated);
+            String contentType = file.getContentType();
+            if (contentType != null && contentType.startsWith("video/")) {
+                media.setMediaType(CommercialPropertyMedia.MediaType.VIDEO);
+                media.setOrd(0);
+            } else 
+            if(contentType != null && contentType.startsWith("image/")) {
+                media.setMediaType(CommercialPropertyMedia.MediaType.IMAGE);
+                media.setOrd(order);
+                order++;
+            } else 
+            if(contentType != null && (contentType.startsWith("application/") || contentType.startsWith("text/"))){
+                media.setMediaType(CommercialPropertyMedia.MediaType.BROCHURE);
+                media.setOrd(-1);
+            } else {
+                media.setMediaType(CommercialPropertyMedia.MediaType.OTHER);
+                media.setOrd(-2);
+            }
+        mediaFilesList.add(media);
         }
+        updated.setCommercialPropertyMediaFiles(mediaFilesList);
+        }
+        updated.setCategory("Commercial");
+        updated.setSold(false);
+        updated.setVip(false);
+        updated.setExpired(false);
+        updated.setReraVerified(false);
+        updated.setAdminApproved("Pending");
+
+        return repository.save(updated);
+
     }
 
-    public List<CommercialPropertyDetails> getByPropertyType(String type) {
-        return repository.findByPropertyType(type);
-    }
 
-    public List<CommercialPropertyDetails> getByPreference(String preference) {
-        return repository.findByPreference(preference);
-    }
-
-    public List<CommercialPropertyDetails> getByPriceLessThan(Integer price) {
-        return repository.findByPriceLessThan(price);
-    }
-
-    public List<CommercialPropertyDetails> getByAreaGreaterThan(Double area) {
-        return repository.findByAreaGreaterThan(area);
-    }
-
-    public List<CommercialPropertyDetails> getByMinCabins(Integer cabins) {
-        return repository.findByCabinsGreaterThanEqual(cabins);
-    }
-
-    public Object updateProperty(CommercialPropertyRequest property, List<MultipartFile> files, Integer agentId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateProperty'");
-    }
-
+    @Transactional
     public void deletePropertyMedia(Integer listingId, Integer agentId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+       CommercialPropertyDetails prop = repository.findByListingIdAndCommercialOwner_UserId(listingId, agentId).orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+
+        for(CommercialPropertyMedia m : prop.getCommercialPropertyMediaFiles()){
+                String url = m.getUrl();
+                gcsService.deleteFile(url);
+            }
+        prop.getCommercialPropertyMediaFiles().clear();
+        repository.save(prop);
     }
 }

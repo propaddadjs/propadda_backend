@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.propadda.prop.dto.ResidentialPropertyRequest;
 import com.propadda.prop.dto.ResidentialPropertyResponse;
 import com.propadda.prop.model.ResidentialPropertyAmenities;
 import com.propadda.prop.model.ResidentialPropertyDetails;
@@ -158,5 +159,128 @@ public class ResidentialPropertyMapper {
         return entities.stream()
                 .map(ResidentialPropertyMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public static ResidentialPropertyDetails requestToModel(ResidentialPropertyDetails model, ResidentialPropertyRequest request) {
+        if (model == null) {
+            return null;
+        }
+
+        ResidentialPropertyResponse dto = new ResidentialPropertyResponse();
+
+        // 1. Map fields from ResidentialPropertyDetails
+        model.setTitle(request.getTitle());
+        model.setDescription(request.getDescription());
+        model.setPrice(request.getPrice());
+        model.setMaintenance(request.getMaintenance());
+        model.setArea(request.getArea());
+        model.setBedrooms(request.getBedrooms());
+        model.setBathrooms(request.getBathrooms());
+        model.setFurnishing(request.getFurnishing());
+        model.setFacing(request.getFacing());
+        model.setFloor(request.getFloor());
+        model.setAge(request.getAge());
+        model.setAvailability(request.getAvailability());
+        model.setReraNumber(request.getReraNumber());
+        model.setReraVerified(request.getReraVerified());
+        model.setState(request.getState());
+        model.setCity(request.getCity());
+        model.setLocality(request.getLocality());
+        model.setAddress(request.getAddress());
+        model.setPincode(request.getPincode());
+        model.setNearbyPlace(request.getNearbyPlace());
+        model.setTotalFloors(request.getTotalFloors());
+        model.setSecurityDeposit(request.getSecurityDeposit());
+        model.setBalconies(request.getBalconies());
+        model.setPowerBackup(request.getPowerBackup());
+        model.setCoveredParking(request.getCoveredParking());
+        model.setOpenParking(request.getOpenParking());
+
+        // 4. Map fields from ResidentialPropertyAmenities
+        ResidentialPropertyAmenities amenities = new ResidentialPropertyAmenities();
+        
+            // Property features
+            amenities.setCenterCooling(request.isCenterCooling());
+            amenities.setFireAlarm(request.isFireAlarm());
+            amenities.setHeating(request.isHeating());
+            amenities.setGym(request.isGym());
+            amenities.setModularKitchen(request.isModularKitchen());
+            amenities.setPool(request.isPool());
+            amenities.setElevator(request.isElevator());
+            amenities.setPetFriendly(request.isPetFriendly());
+            amenities.setStorage(request.isStorage());
+            amenities.setLaundry(request.isLaundry());
+            amenities.setDishwasher(request.isDishwasher());
+            amenities.setDryer(request.isDryer());
+            amenities.setSauna(request.isSauna());
+            amenities.setEmergencyExit(request.isEmergencyExit());
+            amenities.setWaterPurifier(request.isWaterPurifier());
+            amenities.setGasPipeline(request.isGasPipeline());
+            amenities.setPark(request.isPark());
+            amenities.setVastuCompliant(request.isVastuCompliant());
+            amenities.setRainWaterHarvesting(request.isRainWaterHarvesting());
+            amenities.setMaintenanceStaff(request.isMaintenanceStaff());
+            
+            // Other rooms
+            amenities.setPoojaRoom(request.isPoojaRoom());
+            amenities.setStudyRoom(request.isStudyRoom());
+            amenities.setServantRoom(request.isServantRoom());
+            amenities.setStoreRoom(request.isStoreRoom());
+            
+            // Additional property features
+            amenities.setHighCeilingHeight(request.isHighCeilingHeight());
+            amenities.setFalseCeilingLighting(request.isFalseCeilingLighting());
+            amenities.setInternetConnectivity(request.isInternetConnectivity());
+            amenities.setCentrallyAirConditioned(request.isCentrallyAirConditioned());
+            amenities.setSecurityFireAlarm(request.isSecurityFireAlarm());
+            amenities.setRecentlyRenovated(request.isRecentlyRenovated());
+            amenities.setPrivateGardenTerrace(request.isPrivateGardenTerrace());
+            amenities.setNaturalLight(request.isNaturalLight());
+            amenities.setAiryRooms(request.isAiryRooms());
+            amenities.setIntercomFacility(request.isIntercomFacility());
+            amenities.setSpaciousInteriors(request.isSpaciousInteriors());
+            
+            // Society/building features
+            amenities.setFitnessCenter(request.isFitnessCenter());
+            amenities.setSwimmingPool(request.isSwimmingPool());
+            amenities.setClubhouseCommunityCenter(request.isClubhouseCommunityCenter());
+            amenities.setSecurityPersonnel(request.isSecurityPersonnel());
+            amenities.setLifts(request.isLifts()); // Note: Renamed in amenities for clarity if needed, using the entity name 'lifts'
+            
+            // Additional features
+            amenities.setSeparateEntryForServantRoom(request.isSeparateEntryForServantRoom());
+            amenities.setNoOpenDrainageAround(request.isNoOpenDrainageAround());
+            amenities.setBankAttachedProperty(request.isBankAttachedProperty());
+            amenities.setLowDensitySociety(request.isLowDensitySociety());
+            
+            // Water source
+            amenities.setMunicipalCorporation(request.isMunicipalCorporation());
+            amenities.setBorewellTank(request.isBorewellTank());
+            amenities.setWater24x7(request.isWater24x7());
+            
+            // Overlooking
+            amenities.setOverlookingPool(request.isOverlookingPool());
+            amenities.setOverlookingParkGarden(request.isOverlookingParkGarden());
+            amenities.setOverlookingClub(request.isOverlookingClub());
+            amenities.setOverlookingMainRoad(request.isOverlookingMainRoad());
+            
+            // Other features
+            amenities.setInGatedSociety(request.isInGatedSociety());
+            amenities.setCornerProperty(request.isCornerProperty());
+            amenities.setPetFriendlySociety(request.isPetFriendlySociety());
+            amenities.setWheelchairFriendly(request.isWheelchairFriendly());
+            
+            // Location advantages
+            amenities.setCloseToMetroStation(request.isCloseToMetroStation());
+            amenities.setCloseToSchool(request.isCloseToSchool());
+            amenities.setCloseToHospital(request.isCloseToHospital());
+            amenities.setCloseToMarket(request.isCloseToMarket());
+            amenities.setCloseToRailwayStation(request.isCloseToRailwayStation());
+            amenities.setCloseToAirport(request.isCloseToAirport());
+            amenities.setCloseToMall(request.isCloseToMall());
+            amenities.setCloseToHighway(request.isCloseToHighway());
+        
+        model.setAmenities(amenities);
+        return model;
     }
 }

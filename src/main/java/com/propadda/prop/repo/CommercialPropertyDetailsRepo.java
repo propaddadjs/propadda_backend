@@ -41,5 +41,5 @@ public interface CommercialPropertyDetailsRepo extends JpaRepository<CommercialP
 
     List<CommercialPropertyDetails> findByCommercialOwnerAndAdminApprovedAndExpiredAndSold(Users owner, String adminApproved, Boolean expired, Boolean sold);
 
-    Optional<CommercialPropertyDetails> findByListingIdAndCommercialOwner_UserId(Long listingId, Integer userId);
+    Optional<CommercialPropertyDetails> findByListingIdAndCommercialOwner_UserId(Integer listingId, Integer userId);
 }

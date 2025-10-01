@@ -171,4 +171,10 @@ public class AgentController {
         else
         return ResponseEntity.notFound().build();
     }
+
+    @PatchMapping("/renewProperty/{category}/{listingId}/{agentId}")
+    public ResponseEntity<?> renewProperty(@PathVariable Integer listingId, @PathVariable String category, @PathVariable Integer agentId) {
+        Object propObject = agentService.renewProperty(listingId, category,agentId);
+        return ResponseEntity.ok(propObject);
+    }
 }

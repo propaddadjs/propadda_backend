@@ -2,6 +2,7 @@ package com.propadda.prop.dto;
 
 public class ResidentialPropertyRequest {
   
+    private Integer listingId;
     private String preference;
 
     private String propertyType;
@@ -895,6 +896,115 @@ public class ResidentialPropertyRequest {
     public void setVip(Boolean vip) {
         this.vip = vip;
     }
+
+    public Integer getListingId() {
+        return listingId;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ResidentialPropertyRequest{");
+        sb.append("listingId=").append(listingId);
+        sb.append(", preference=").append(preference);
+        sb.append(", propertyType=").append(propertyType);
+        sb.append(", title=").append(title);
+        sb.append(", description=").append(description);
+        sb.append(", price=").append(price);
+        sb.append(", maintenance=").append(maintenance);
+        sb.append(", area=").append(area);
+        sb.append(", bedrooms=").append(bedrooms);
+        sb.append(", bathrooms=").append(bathrooms);
+        sb.append(", furnishing=").append(furnishing);
+        sb.append(", facing=").append(facing);
+        sb.append(", floor=").append(floor);
+        sb.append(", age=").append(age);
+        sb.append(", availability=").append(availability);
+        sb.append(", reraNumber=").append(reraNumber);
+        sb.append(", reraVerified=").append(reraVerified);
+        sb.append(", state=").append(state);
+        sb.append(", city=").append(city);
+        sb.append(", locality=").append(locality);
+        sb.append(", address=").append(address);
+        sb.append(", pincode=").append(pincode);
+        sb.append(", nearbyPlace=").append(nearbyPlace);
+        sb.append(", totalFloors=").append(totalFloors);
+        sb.append(", securityDeposit=").append(securityDeposit);
+        sb.append(", balconies=").append(balconies);
+        sb.append(", powerBackup=").append(powerBackup);
+        sb.append(", coveredParking=").append(coveredParking);
+        sb.append(", openParking=").append(openParking);
+        sb.append(", adminApproved=").append(adminApproved);
+        sb.append(", expired=").append(expired);
+        sb.append(", residentialOwnerId=").append(residentialOwnerId);
+        sb.append(", vip=").append(vip);
+        sb.append(", centerCooling=").append(centerCooling);
+        sb.append(", fireAlarm=").append(fireAlarm);
+        sb.append(", heating=").append(heating);
+        sb.append(", gym=").append(gym);
+        sb.append(", modularKitchen=").append(modularKitchen);
+        sb.append(", pool=").append(pool);
+        sb.append(", elevator=").append(elevator);
+        sb.append(", petFriendly=").append(petFriendly);
+        sb.append(", storage=").append(storage);
+        sb.append(", laundry=").append(laundry);
+        sb.append(", dishwasher=").append(dishwasher);
+        sb.append(", dryer=").append(dryer);
+        sb.append(", sauna=").append(sauna);
+        sb.append(", emergencyExit=").append(emergencyExit);
+        sb.append(", waterPurifier=").append(waterPurifier);
+        sb.append(", gasPipeline=").append(gasPipeline);
+        sb.append(", park=").append(park);
+        sb.append(", vastuCompliant=").append(vastuCompliant);
+        sb.append(", rainWaterHarvesting=").append(rainWaterHarvesting);
+        sb.append(", maintenanceStaff=").append(maintenanceStaff);
+        sb.append(", poojaRoom=").append(poojaRoom);
+        sb.append(", studyRoom=").append(studyRoom);
+        sb.append(", servantRoom=").append(servantRoom);
+        sb.append(", storeRoom=").append(storeRoom);
+        sb.append(", highCeilingHeight=").append(highCeilingHeight);
+        sb.append(", falseCeilingLighting=").append(falseCeilingLighting);
+        sb.append(", internetConnectivity=").append(internetConnectivity);
+        sb.append(", centrallyAirConditioned=").append(centrallyAirConditioned);
+        sb.append(", securityFireAlarm=").append(securityFireAlarm);
+        sb.append(", recentlyRenovated=").append(recentlyRenovated);
+        sb.append(", privateGardenTerrace=").append(privateGardenTerrace);
+        sb.append(", naturalLight=").append(naturalLight);
+        sb.append(", airyRooms=").append(airyRooms);
+        sb.append(", intercomFacility=").append(intercomFacility);
+        sb.append(", spaciousInteriors=").append(spaciousInteriors);
+        sb.append(", fitnessCenter=").append(fitnessCenter);
+        sb.append(", swimmingPool=").append(swimmingPool);
+        sb.append(", clubhouseCommunityCenter=").append(clubhouseCommunityCenter);
+        sb.append(", securityPersonnel=").append(securityPersonnel);
+        sb.append(", lifts=").append(lifts);
+        sb.append(", separateEntryForServantRoom=").append(separateEntryForServantRoom);
+        sb.append(", noOpenDrainageAround=").append(noOpenDrainageAround);
+        sb.append(", bankAttachedProperty=").append(bankAttachedProperty);
+        sb.append(", lowDensitySociety=").append(lowDensitySociety);
+        sb.append(", municipalCorporation=").append(municipalCorporation);
+        sb.append(", borewellTank=").append(borewellTank);
+        sb.append(", water24x7=").append(water24x7);
+        sb.append(", overlookingPool=").append(overlookingPool);
+        sb.append(", overlookingParkGarden=").append(overlookingParkGarden);
+        sb.append(", overlookingClub=").append(overlookingClub);
+        sb.append(", overlookingMainRoad=").append(overlookingMainRoad);
+        sb.append(", inGatedSociety=").append(inGatedSociety);
+        sb.append(", cornerProperty=").append(cornerProperty);
+        sb.append(", petFriendlySociety=").append(petFriendlySociety);
+        sb.append(", wheelchairFriendly=").append(wheelchairFriendly);
+        sb.append(", closeToMetroStation=").append(closeToMetroStation);
+        sb.append(", closeToSchool=").append(closeToSchool);
+        sb.append(", closeToHospital=").append(closeToHospital);
+        sb.append(", closeToMarket=").append(closeToMarket);
+        sb.append(", closeToRailwayStation=").append(closeToRailwayStation);
+        sb.append(", closeToAirport=").append(closeToAirport);
+        sb.append(", closeToMall=").append(closeToMall);
+        sb.append(", closeToHighway=").append(closeToHighway);
+        sb.append('}');
+        return sb.toString();
+    }
+
 
 
 }

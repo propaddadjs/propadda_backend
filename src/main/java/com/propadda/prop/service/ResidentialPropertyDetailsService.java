@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.propadda.prop.dto.ResidentialPropertyRequest;
 import com.propadda.prop.enumerations.Role;
+import com.propadda.prop.mappers.ResidentialPropertyMapper;
 import com.propadda.prop.model.ResidentialPropertyAmenities;
 import com.propadda.prop.model.ResidentialPropertyDetails;
 import com.propadda.prop.model.ResidentialPropertyMedia;
@@ -231,250 +231,79 @@ public class ResidentialPropertyDetailsService {
     
     // Delete property
     @Transactional
-    public void deleteProperty(Integer id, Integer agentId) {
-        Optional<ResidentialPropertyDetails> rpd = repository.findById(id);
-        if(rpd.isPresent()){
-            for(ResidentialPropertyMedia m : rpd.get().getResidentialPropertyMediaFiles()){
+    public void deleteProperty(Integer listingId, Integer agentId) {
+        ResidentialPropertyDetails rpd = repository.findByListingIdAndResidentialOwner_UserId(listingId,agentId).orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));;
+        
+            for(ResidentialPropertyMedia m : rpd.getResidentialPropertyMediaFiles()){
                 String url = m.getUrl();
                 gcsService.deleteFile(url);
             }
-            favRepo.deleteByPropertyIdAndPropertyType(id,"Commercial");
-            enqRepo.deleteByPropertyIdAndPropertyType(id, "Commercial");
-            repository.deleteById(id);
+            favRepo.deleteByPropertyIdAndPropertyType(listingId,"Commercial");
+            enqRepo.deleteByPropertyIdAndPropertyType(listingId, "Commercial");
+            repository.deleteById(listingId);
+        
+    }
+
+    @Transactional
+    public Object updateProperty(ResidentialPropertyRequest property, List<MultipartFile> files, Integer agentId) throws IOException {
+        System.out.println("Property request: "+property.toString()+" agent id: "+agentId);
+        ResidentialPropertyDetails propModel = repository.findByListingIdAndResidentialOwner(property.getListingId(), usersRepo.findById(agentId).get())
+            .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+        
+        ResidentialPropertyDetails updated = ResidentialPropertyMapper.requestToModel(propModel, property);
+
+        if (files != null && !files.isEmpty()) {
+            Integer order = 1;
+            List<ResidentialPropertyMedia> mediaFilesList = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String url = gcsService.uploadFile(file,"residential");
+            ResidentialPropertyMedia media = new ResidentialPropertyMedia();
+            media.setUrl(url);
+            media.setFilename(file.getOriginalFilename());
+            media.setSize(file.getSize());
+            media.setUploadedAt(Instant.now());
+            media.setProperty(updated);
+            String contentType = file.getContentType();
+            if (contentType != null && contentType.startsWith("video/")) {
+                media.setMediaType(ResidentialPropertyMedia.MediaType.VIDEO);
+                media.setOrd(0);
+            } else 
+            if(contentType != null && contentType.startsWith("image/")) {
+                media.setMediaType(ResidentialPropertyMedia.MediaType.IMAGE);
+                media.setOrd(order);
+                order++;
+            } else 
+            if(contentType != null && (contentType.startsWith("application/") || contentType.startsWith("text/"))){
+                media.setMediaType(ResidentialPropertyMedia.MediaType.BROCHURE);
+                media.setOrd(-1);
+            } else {
+                media.setMediaType(ResidentialPropertyMedia.MediaType.OTHER);
+                media.setOrd(-2);
+            }
+        mediaFilesList.add(media);
         }
+        updated.setResidentialPropertyMediaFiles(mediaFilesList);
+        }
+        updated.setCategory("Residential");
+        updated.setSold(false);
+        updated.setVip(false);
+        updated.setExpired(false);
+        updated.setReraVerified(false);
+        updated.setAdminApproved("Pending");
+
+        return repository.save(updated);
     }
 
-    public Object updateProperty(ResidentialPropertyRequest property, List<MultipartFile> files, Integer agentId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateProperty'");
-    }
-
+    @Transactional
     public void deletePropertyMedia(Integer listingId, Integer agentId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+         ResidentialPropertyDetails prop = repository.findByListingIdAndResidentialOwner_UserId(listingId, agentId)
+            .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
+
+        for(ResidentialPropertyMedia m : prop.getResidentialPropertyMediaFiles()){
+                String url = m.getUrl();
+                gcsService.deleteFile(url);
+            }
+        prop.getResidentialPropertyMediaFiles().clear();
+        repository.save(prop);
     }
-
-
-    // service/impl/PropertyServiceImpl.java
-// package com.yourapp.service.impl;
-
-// import com.yourapp.domain.*;
-// import com.yourapp.repo.*;
-// import com.yourapp.service.PropertyService;
-// import com.yourapp.service.storage.MediaStorageService;
-// import com.yourapp.web.dto.CommercialPropertyRequest;
-// import com.yourapp.web.dto.ResidentialPropertyRequest;
-// import jakarta.transaction.Transactional;
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.stereotype.Service;
-// import org.springframework.web.multipart.MultipartFile;
-
-// import java.io.IOException;
-// import java.util.*;
-// import java.util.stream.Collectors;
-
-// @Service
-// @RequiredArgsConstructor
-// public class PropertyServiceImpl implements PropertyService {
-
-//     private final ResidentialPropertyRepository residentialRepo;
-//     private final CommercialPropertyRepository commercialRepo;
-//     private final MediaFileRepository mediaRepo;
-//     private final MediaStorageService storage;
-
-//     // ---------- UPDATE (RESIDENTIAL) ----------
-//     @Override
-//     @Transactional
-//     public Object updateResidential(ResidentialPropertyRequest dto, List<MultipartFile> files, Integer agentId) throws IOException {
-//         Long listingId = dto.getListingId(); // ensure your DTO has it
-//         ResidentialProperty prop = residentialRepo.findByListingIdAndResidentialOwner_UserId(listingId, agentId)
-//                 .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
-
-//         // Merge editable fields only
-//         mergeResidential(prop, dto);
-
-//         // Attach any newly uploaded media (replace happens through separate DELETE endpoint)
-//         if (files != null && !files.isEmpty()) {
-//             List<MediaFile> newMedia = buildMediaFilesFromUploads("residential", files, null, null);
-//             newMedia.forEach(m -> m.setResidential(prop));
-//             prop.getMediaFiles().addAll(newMedia);
-//         }
-
-//         ResidentialProperty saved = residentialRepo.save(prop);
-//         return saved; // or map to response DTO
-//     }
-
-//     // ---------- UPDATE (COMMERCIAL) ----------
-//     @Override
-//     @Transactional
-//     public Object updateCommercial(CommercialPropertyRequest dto, List<MultipartFile> files, Integer agentId) throws IOException {
-//         Long listingId = dto.getListingId(); // ensure your DTO has it
-//         CommercialProperty prop = commercialRepo.findByListingIdAndCommercialOwner_UserId(listingId, agentId)
-//                 .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
-
-//         // Merge editable fields only
-//         mergeCommercial(prop, dto);
-
-//         if (files != null && !files.isEmpty()) {
-//             List<MediaFile> newMedia = buildMediaFilesFromUploads("commercial", files, null, null);
-//             newMedia.forEach(m -> m.setCommercial(prop));
-//             prop.getMediaFiles().addAll(newMedia);
-//         }
-
-//         CommercialProperty saved = commercialRepo.save(prop);
-//         return saved; // or map to response DTO
-//     }
-
-//     // ---------- DELETE MEDIA (for a listing) ----------
-//     // This is what your "replace media" button should call first.
-//     @Override
-//     @Transactional
-//     public void deleteMedia(Long listingId, Integer agentId, String category) {
-//         if (isCommercial(category)) {
-//             CommercialProperty prop = commercialRepo.findByListingIdAndCommercialOwner_UserId(listingId, agentId)
-//                     .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
-
-//             // Optionally delete from bucket:
-//             // prop.getMediaFiles().forEach(m -> storage.deleteByUrl(m.getUrl()));
-
-//             mediaRepo.deleteByCommercial_ListingId(listingId);
-//             prop.getMediaFiles().clear();
-//         } else {
-//             ResidentialProperty prop = residentialRepo.findByListingIdAndResidentialOwner_UserId(listingId, agentId)
-//                     .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
-
-//             // Optionally delete from bucket:
-//             // prop.getMediaFiles().forEach(m -> storage.deleteByUrl(m.getUrl()));
-
-//             mediaRepo.deleteByResidential_ListingId(listingId);
-//             prop.getMediaFiles().clear();
-//         }
-//     }
-
-//     // ---------- DELETE PROPERTY (entire listing + media) ----------
-//     @Override
-//     @Transactional
-//     public void deleteProperty(Long listingId, Integer agentId, String category) {
-//         if (isCommercial(category)) {
-//             CommercialProperty prop = commercialRepo.findByListingIdAndCommercialOwner_UserId(listingId, agentId)
-//                     .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
-
-//             // Optionally delete from bucket first
-//             // prop.getMediaFiles().forEach(m -> storage.deleteByUrl(m.getUrl()));
-
-//             commercialRepo.delete(prop);
-//         } else {
-//             ResidentialProperty prop = residentialRepo.findByListingIdAndResidentialOwner_UserId(listingId, agentId)
-//                     .orElseThrow(() -> new IllegalArgumentException("Property not found or not owned by agent"));
-
-//             // Optionally delete from bucket first
-//             // prop.getMediaFiles().forEach(m -> storage.deleteByUrl(m.getUrl()));
-
-//             residentialRepo.delete(prop);
-//         }
-//     }
-
-//     // ---------- Helpers ----------
-
-//     // Assign ords per your rule: one video ord=0, one brochure ord=-1, images ord=1..8
-//     // If caller passes all in one batch, we’ll infer by MIME type (video/*, application/pdf/doc[x]=brochure, else image/*).
-//     private List<MediaFile> buildMediaFilesFromUploads(String categoryFolder,
-//                                                        List<MultipartFile> files,
-//                                                        Integer startingImageOrd,     // allow caller to append images after a number
-//                                                        OrdOverride override) throws IOException {
-//         // discover ord starting points
-//         int imageOrd = (startingImageOrd != null ? startingImageOrd : 1);
-//         boolean videoTaken = false;
-//         boolean brochureTaken = false;
-
-//         List<MediaFile> result = new ArrayList<>();
-//         for (MultipartFile f : files) {
-//             String contentType = Optional.ofNullable(f.getContentType()).orElse("");
-//             String url = safeUpload(categoryFolder, f);
-//             String name = Objects.requireNonNullElse(f.getOriginalFilename(), "file");
-
-//             if (override != null && override.isVideo(name)) {
-//                 result.add(MediaFile.builder().url(url).filename(name).ord(0).build());
-//                 videoTaken = true;
-//                 continue;
-//             }
-//             if (override != null && override.isBrochure(name)) {
-//                 result.add(MediaFile.builder().url(url).filename(name).ord(-1).build());
-//                 brochureTaken = true;
-//                 continue;
-//             }
-
-//             if (contentType.startsWith("video/") && !videoTaken) {
-//                 result.add(MediaFile.builder().url(url).filename(name).ord(0).build());
-//                 videoTaken = true;
-//             } else if (isBrochureType(contentType, name) && !brochureTaken) {
-//                 result.add(MediaFile.builder().url(url).filename(name).ord(-1).build());
-//                 brochureTaken = true;
-//             } else {
-//                 result.add(MediaFile.builder().url(url).filename(name).ord(imageOrd++).build());
-//             }
-//         }
-//         return result;
-//     }
-
-//     private boolean isBrochureType(String contentType, String name) {
-//         String lower = name.toLowerCase(Locale.ROOT);
-//         return "application/pdf".equalsIgnoreCase(contentType)
-//                 || lower.endsWith(".pdf")
-//                 || lower.endsWith(".doc")
-//                 || lower.endsWith(".docx");
-//     }
-
-//     private String safeUpload(String categoryFolder, MultipartFile f) throws IOException {
-//         try {
-//             return storage.uploadPropertyAsset(categoryFolder, f);
-//         } catch (Exception e) {
-//             throw new IOException("Failed to upload media: " + f.getOriginalFilename(), e);
-//         }
-//     }
-
-//     private boolean isCommercial(String category) {
-//         return category != null && category.equalsIgnoreCase("commercial");
-//     }
-
-//     // Merge only editable fields from DTO into entity (leave non-editables alone)
-//     private void mergeResidential(ResidentialProperty p, ResidentialPropertyRequest d) {
-//         if (d.getTitle() != null) p.setTitle(d.getTitle());
-//         if (d.getDescription() != null) p.setDescription(d.getDescription());
-//         if (d.getPrice() != null) p.setPrice(d.getPrice());
-//         if (d.getArea() != null) p.setArea(d.getArea());
-
-//         if (d.getState() != null) p.setState(d.getState());
-//         if (d.getCity() != null) p.setCity(d.getCity());
-//         if (d.getLocality() != null) p.setLocality(d.getLocality());
-//         if (d.getAddress() != null) p.setAddress(d.getAddress());
-//         if (d.getPincode() != null) p.setPincode(d.getPincode());
-//         if (d.getNearbyPlace() != null) p.setNearbyPlace(d.getNearbyPlace());
-
-//         // … repeat for all editable fields (maintenance, bedrooms, bathrooms, furnishing, facing, age, availability, possessionBy, floor, totalFloors, reraNumber, balconies, powerBackup, securityDeposit, coveredParking, openParking, and all booleans)
-//         // Tip: if your DTO has a ton of fields, use MapStruct with @BeanMapping(ignoreByDefault=true)
-//     }
-
-//     private void mergeCommercial(CommercialProperty p, CommercialPropertyRequest d) {
-//         if (d.getTitle() != null) p.setTitle(d.getTitle());
-//         if (d.getDescription() != null) p.setDescription(d.getDescription());
-//         if (d.getPrice() != null) p.setPrice(d.getPrice());
-//         if (d.getArea() != null) p.setArea(d.getArea());
-
-//         if (d.getState() != null) p.setState(d.getState());
-//         if (d.getCity() != null) p.setCity(d.getCity());
-//         if (d.getLocality() != null) p.setLocality(d.getLocality());
-//         if (d.getAddress() != null) p.setAddress(d.getAddress());
-//         if (d.getPincode() != null) p.setPincode(d.getPincode());
-//         if (d.getNearbyPlace() != null) p.setNearbyPlace(d.getNearbyPlace());
-
-//         // … plus commercial extras & booleans
-//     }
-
-//     // Optional hook to force ord by filename
-//     private record OrdOverride(Set<String> videoNames, Set<String> brochureNames) {
-//         boolean isVideo(String name) { return videoNames != null && videoNames.contains(name); }
-//         boolean isBrochure(String name) { return brochureNames != null && brochureNames.contains(name); }
-//     }
-// }
-
 }

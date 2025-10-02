@@ -24,7 +24,7 @@ import com.propadda.prop.model.HelpDetails;
 import com.propadda.prop.service.AgentService;
 
 @CrossOrigin(
-  origins = { "http://localhost:5173" },
+  origins = { "https://propadda-frontend-506455747754.asia-south2.run.app" },
   allowCredentials = "true",                       // string in annotation
   allowedHeaders = { "Authorization", "Content-Type", "X-Requested-With" },
   methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS }

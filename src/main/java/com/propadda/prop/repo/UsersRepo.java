@@ -15,7 +15,7 @@ public interface UsersRepo extends JpaRepository<Users, Integer> {
     @Query("SELECT u FROM Users u WHERE u.kycVerified = 'PENDING'")
     List<Users> findUsersWithPendingKyc();
 
-    @Query("SELECT u FROM Users u WHERE u.role = 'SELLER' AND u.kycVerified = 'APPROVED'")
+    @Query("SELECT u FROM Users u WHERE u.role = 'AGENT' AND u.kycVerified = 'APPROVED'")
     List<Users> findSellers();
 
     List<Users> findByRole(Role role);

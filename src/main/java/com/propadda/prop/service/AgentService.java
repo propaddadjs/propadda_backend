@@ -252,7 +252,7 @@ public class AgentService {
     }
 
     @Transactional
-    public Object markNotificationViewedForAgent(Integer notificationId, Integer agentId) {
+    public Object markNotificationViewedForAgent(Integer agentId, Integer notificationId) {
         if(notifRepo.findById(notificationId).isPresent()){
             NotificationDetails n = notifRepo.findById(notificationId).get();
             if(n.getNotificationReceiverId().equals(agentId)){

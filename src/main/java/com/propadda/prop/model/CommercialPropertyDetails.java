@@ -42,10 +42,10 @@ public class CommercialPropertyDetails {
     @Column(name="description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name="price", nullable = false)
+    @Column(name="price")
     private Integer price;
 
-    @Column(name="area", nullable = false)
+    @Column(name="area")
     private Double area;
 
     @Column(name = "rera_number")
@@ -75,10 +75,10 @@ public class CommercialPropertyDetails {
     @Column(name="parking")
     private Boolean parking;
 
-    @Column(name="age", nullable = false)
+    @Column(name="age")
     private String age;
 
-    @Column(name="availability", nullable = false)
+    @Column(name="availability")
     private String availability;
 
     @Column(name="securityDeposit")

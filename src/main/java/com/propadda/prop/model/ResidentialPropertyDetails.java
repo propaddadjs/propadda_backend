@@ -43,31 +43,31 @@ public class ResidentialPropertyDetails {
     @Column(name="description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name="price", nullable = false)
+    @Column(name="price")
     private Integer price;
 
     @Column(name="maintenance")
     private Integer maintenance;
 
-    @Column(name="area", nullable = false)
+    @Column(name="area")
     private Double area;
 
-    @Column(name="bedrooms", nullable = false)
+    @Column(name="bedrooms")
     private Integer bedrooms;
 
-    @Column(name="bathrooms", nullable = false)
+    @Column(name="bathrooms")
     private Integer bathrooms;
 
-    @Column(name="furnishing", nullable = false)
+    @Column(name="furnishing")
     private String furnishing;
 
-    @Column(name="facing", nullable = false)
+    @Column(name="facing")
     private String facing;
 
     @Column(name="floor")
     private Integer floor;
 
-    @Column(name="age", nullable = false)
+    @Column(name="age")
     private String age;
 
     @Column(name="availability")
@@ -79,25 +79,25 @@ public class ResidentialPropertyDetails {
     @Column(name = "rera_verified")
     private Boolean reraVerified;
 
-    @Column(name="state", nullable = false)
+    @Column(name="state")
     private String state;
 
-    @Column(name="city", nullable = false)
+    @Column(name="city")
     private String city;
 
-    @Column(name="locality", nullable = false)
+    @Column(name="locality")
     private String locality;
 
-    @Column(name="address", nullable = false)
+    @Column(name="address")
     private String address;
 
-    @Column(name="pincode", nullable = false)
+    @Column(name="pincode")
     private Integer pincode;
 
-    @Column(name="nearby_place", nullable = false)
+    @Column(name="nearby_place")
     private String nearbyPlace;
 
-    @Column(name = "total_floors", nullable = false)
+    @Column(name = "total_floors")
     private Integer totalFloors;
 
     @Column(name = "security_deposit")
